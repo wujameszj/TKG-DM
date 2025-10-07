@@ -44,10 +44,8 @@ def create_2d_gaussian(height, width, std_dev, center_x=0, center_y=0):
     Coordinates are normalized in the range [-1, 1] using the specified standard deviation (std_dev).
     Returns a tensor with shape (1, 1, height//8, width//8).
     """
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-
-    y = torch.linspace(-1, 1, height // 8, device=device)
-    x = torch.linspace(-1, 1, width // 8, device=device)
+    y = torch.linspace(-1, 1, height // 8)
+    x = torch.linspace(-1, 1, width // 8)
     y_grid, x_grid = torch.meshgrid(y, x, indexing="ij")
 
     x_grid = x_grid - center_x
@@ -58,7 +56,7 @@ def create_2d_gaussian(height, width, std_dev, center_x=0, center_y=0):
     gaussian = gaussian.unsqueeze(0).unsqueeze(0)
     return gaussian
 
-def tkg_noise(latents: torch.Tensor, device: str) -> torch.Tensor:
+def tkg_noise(latents: torch.Tensor) -> torch.Tensor:
     """
     Apply noise processing to latent variables based on the tkg method.
     """
@@ -67,6 +65,6 @@ def tkg_noise(latents: torch.Tensor, device: str) -> torch.Tensor:
     mask = create_2d_gaussian(height=latents.shape[2], width=latents.shape[3], std_dev=0.5)
     mask = torch.nn.functional.interpolate(mask, size=(latents.shape[2], latents.shape[3]), mode='bilinear', align_corners=False)
     mask = mask.expand(-1, latents.shape[1], -1, -1)
-    mask = mask.to(device).to(torch.float16)
+    mask = mask.to(latents.device).to(torch.float16)
     latents = mask * latents + (1 - mask) * z_T_star
     return latents

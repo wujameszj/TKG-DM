@@ -58,7 +58,7 @@ class StableDiffusionGenerator:
             set_random_seed(self.seed)
             latents = torch.randn((1, 4, latent_size, latent_size), device=self.device, dtype=torch.float16)
             if self.use_tkg:
-                latents = tkg_noise(latents, self.device)
+                latents = tkg_noise(latents)
             with torch.no_grad():
                 image = self.pipe(
                     prompt=prompt + active_prompts,
