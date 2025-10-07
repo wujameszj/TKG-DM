@@ -8,6 +8,7 @@ def parse_args():
     parser.add_argument("--method", type=str, choices=METHODS, default="gbp", help="Choose the generation technique (e.g., gbp, tkg)")
     parser.add_argument("--device", type=int, default=0, help="Index of the CUDA GPU to be used")
     parser.add_argument("--seed", type=int, default=1234, help="Seed for random number generation to ensure reproducibility")
+    parser.add_argument("--steps", type=int, default=50, help="Inference steps")
     return parser.parse_args()
 
 def main():
@@ -29,6 +30,7 @@ def main():
         base_prompts=base_prompts,
         active_prompts=active_prompts,
         negative_prompts=negative_prompts,
+        steps=args.steps,
     )
 
     output_dir = os.path.join("outputs", "sdxl", args.method, str(args.seed))

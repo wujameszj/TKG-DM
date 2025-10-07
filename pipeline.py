@@ -37,7 +37,7 @@ class StableDiffusionGenerator:
         negative_prompts: str,
         guidance_scale: float = 7.5,
         latent_size: int = 128,
-        steps: int = 50
+        steps: int = 50,
     ):
         """
         Generate images based on the specified prompts.
