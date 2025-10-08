@@ -2,6 +2,7 @@ import os
 import argparse
 from config import METHODS
 from pipeline import StableDiffusionGenerator
+from torchvision.utils import save_image
 
 def parse_args():
     parser = argparse.ArgumentParser(description="A program for creating greenback images using diverse techniques")
@@ -9,6 +10,9 @@ def parse_args():
     parser.add_argument("--device", type=int, default=0, help="Index of the CUDA GPU to be used")
     parser.add_argument("--seed", type=int, default=1234, help="Seed for random number generation to ensure reproducibility")
     parser.add_argument("--steps", type=int, default=50, help="Inference steps")
+    parser.add_argument("--cx", type=float, default=0, help="Center x coordinate within [-1, 1]")
+    parser.add_argument("--cy", type=float, default=0, help="Center y coordinate within [-1, 1]")
+    parser.add_argument("--sd", type=float, default=.5, help="Standard deviation")
     return parser.parse_args()
 
 def main():
@@ -26,11 +30,14 @@ def main():
     active_prompts = ', realistic, photo-realistic, 4K, high resolution, high quality'
     negative_prompts = 'background, character, cartoon, anime, text, fail, low resolution'
 
-    prompts, generated_images = generator.generate_images(
+    prompts, generated_images, masks = generator.generate_images(
         base_prompts=base_prompts,
         active_prompts=active_prompts,
         negative_prompts=negative_prompts,
         steps=args.steps,
+        center_x=args.cx,
+        center_y=args.cy,
+        standard_dev=args.sd,
     )
 
     output_dir = os.path.join("outputs", "sdxl", args.method, str(args.seed))
@@ -40,6 +47,8 @@ def main():
     for prompt, img in zip(prompts, generated_images):
         filename = f"{prompt.replace(' ', '_')[:10]}.png"
         img.save(os.path.join(output_dir, filename))
+    save_image(masks, "mask.jpg")
+
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,6 @@
 # utils.py
 import os
 import numpy as np
-from PIL import Image
 import torch
 
 def set_random_seed(seed: int = 42):
@@ -52,19 +51,14 @@ def create_2d_gaussian(height, width, std_dev, center_x=0, center_y=0):
     y_grid = y_grid - center_y
 
     gaussian = torch.exp(-((x_grid ** 2 + y_grid ** 2) / (2 * std_dev ** 2)))
-
-    gaussian = gaussian.unsqueeze(0).unsqueeze(0)
+    gaussian = torch.nn.functional.interpolate(gaussian.unsqueeze(0).unsqueeze(0), scale_factor=8, mode='bilinear', align_corners=False)
     return gaussian
 
-def tkg_noise(latents: torch.Tensor) -> torch.Tensor:
+def tkg_noise(latents: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
     """
     Apply noise processing to latent variables based on the tkg method.
     """
-    from utils import channel_mean_shift, create_2d_gaussian
     z_T_star = channel_mean_shift(latents)
-    mask = create_2d_gaussian(height=latents.shape[2], width=latents.shape[3], std_dev=0.5)
-    mask = torch.nn.functional.interpolate(mask, size=(latents.shape[2], latents.shape[3]), mode='bilinear', align_corners=False)
-    mask = mask.expand(-1, latents.shape[1], -1, -1)
-    mask = mask.to(latents.device).to(torch.float16)
+    mask = mask.expand(-1, latents.shape[1], -1, -1).to(latents.device).to(torch.float16)
     latents = mask * latents + (1 - mask) * z_T_star
     return latents
