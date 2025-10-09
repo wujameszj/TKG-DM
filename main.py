@@ -13,6 +13,7 @@ def parse_args():
     parser.add_argument("--cx", type=float, default=0, help="Center x coordinate within [-1, 1]")
     parser.add_argument("--cy", type=float, default=0, help="Center y coordinate within [-1, 1]")
     parser.add_argument("--sd", type=float, default=.5, help="Standard deviation")
+    parser.add_argument("--shift_ratio", type=float, default=.11, help="Standard deviation")
     parser.add_argument("--output_dir", type=str, default="outputs")
     return parser.parse_args()
 
@@ -39,6 +40,7 @@ def main():
         center_x=args.cx,
         center_y=args.cy,
         standard_dev=args.sd,
+        shift_ratio=args.shift_ratio,
     )
 
     output_dir = os.path.join(args.output_dir, "sdxl", args.method, str(args.seed))

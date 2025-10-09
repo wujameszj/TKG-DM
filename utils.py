@@ -51,32 +51,11 @@ def create_2d_gaussian(height, width, std_dev, center_x=0, center_y=0):
     return gaussian.unsqueeze(0).unsqueeze(0)
 
 
-# def create_2d_gaussian(height, width, std_dev, center_x=0, center_y=0):
-#     """
-#     Create a 2D Gaussian distribution where the center (center_x, center_y) is 1 and the periphery gradually decays towards 0.
-#     Coordinates are normalized in the range [-1, 1] using the specified standard deviation (std_dev).
-#     Returns a tensor with shape (1, 1, height//8, width//8).
-#     """
-#     device = "cuda" if torch.cuda.is_available() else "cpu"
-
-#     y = torch.linspace(-1, 1, height // 8, device=device)
-#     x = torch.linspace(-1, 1, width // 8, device=device)
-#     y_grid, x_grid = torch.meshgrid(y, x, indexing="ij")
-
-#     x_grid = x_grid - center_x
-#     y_grid = y_grid - center_y
-
-#     gaussian = torch.exp(-((x_grid ** 2 + y_grid ** 2) / (2 * std_dev ** 2)))
-
-#     gaussian = gaussian.unsqueeze(0).unsqueeze(0)
-#     return torch.nn.functional.interpolate(gaussian, size=(height, width), mode='bilinear', align_corners=False)
-
-
-def tkg_noise(latents: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
+def tkg_noise(latents: torch.Tensor, shift_ratio: float, mask: torch.Tensor) -> torch.Tensor:
     """
     Apply noise processing to latent variables based on the tkg method.
     """
-    z_T_star = channel_mean_shift(latents)
+    z_T_star = channel_mean_shift(latents, target_shift=shift_ratio)
     mask = mask.expand(-1, latents.shape[1], -1, -1).to(latents.device).to(torch.float16)
     latents = mask * latents + (1 - mask) * z_T_star
     return latents

@@ -41,6 +41,7 @@ class StableDiffusionGenerator:
         center_x: float = 0,
         center_y: float = 0,
         standard_dev: float = .5,
+        shift_ratio: float = .11,
     ):
         """
         Generate images based on the specified prompts.
@@ -62,7 +63,7 @@ class StableDiffusionGenerator:
             latents = torch.randn((1, 4, latent_size, latent_size), device=self.device, dtype=torch.float16)
             if self.use_tkg:
                 mask = create_2d_gaussian(height=latents.shape[2], width=latents.shape[3], std_dev=standard_dev, center_x=center_x, center_y=center_y)
-                latents = tkg_noise(latents, mask)
+                latents = tkg_noise(latents, shift_ratio, mask)
             with torch.no_grad():
                 image = self.pipe(
                     prompt=prompt + active_prompts,
